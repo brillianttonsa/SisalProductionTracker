@@ -9,7 +9,6 @@ export const signToken = (user) => {
     const payload = {
         userId: user.id,
         username: user.username,
-        role: user.role
     };
     return jwt.sign(payload, jwt_SECRET, { expiresIn: DEFAULT_EXPIRATION });
 };

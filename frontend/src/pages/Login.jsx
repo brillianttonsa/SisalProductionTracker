@@ -16,13 +16,12 @@ const Login = () => {
     const [registerData, setRegisterData] = useState({
         username: "",
         email: "",
-        password: "",
         full_name: "",
-        phone: "",
-        role: "worker",
+        password: "",
+        confirmPassword: ""
       })
 
-    // const { Login, Register } = useAuth()
+    const { login, register } = useAuth()
     const navigate = useNavigate()
 
     const handleInputChange = (e) => {
@@ -39,7 +38,7 @@ const Login = () => {
         setIsLoading(true)
         setError("")
 
-        const result = await Login(formData, username, formData.password)
+        const result = await login(formData.username, formData.password)
 
         if (result.success) {
             navigate("/dashboard")
@@ -55,7 +54,7 @@ const Login = () => {
         setIsLoading(true)
         setError("")
 
-        const result = await Register(registerData)
+        const result = await register(registerData)
 
         if (result.success) {
             navigate("/dashboard")
@@ -200,32 +199,7 @@ const Login = () => {
               />
             </div>
 
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={registerData.phone}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
-                  placeholder="0710000000"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
-                <select
-                  name="role"
-                  value={registerData.role}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
-                >
-                  <option value="worker">Worker</option>
-                  <option value="manager">Manager</option>
-                </select>
-              </div>
-            </div>
-
+            
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
               <div className="relative">
@@ -248,6 +222,21 @@ const Login = () => {
               </div>
             </div>
 
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="confirmPassword"
+                  value={registerData.confirmPassword}
+                  onChange={handleInputChange}
+                  className="w-full pl-3 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                  placeholder="••••••••"
+                  required
+                />
+              </div>
+            </div>
+
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -267,8 +256,8 @@ const Login = () => {
           </form>
         )}
 
-                {/* Toggle between login and register */}
-                <div className="mt-6 text-center">
+        {/* Toggle between login and register */}
+        <div className="mt-6 text-center">
           <button
             onClick={() => {
               setIsRegisterMode(!isRegisterMode)

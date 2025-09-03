@@ -1,12 +1,12 @@
-import { findUserByUsername,createUser,findUserByUsernameOrEmail } from "../services/userModel";
+import { findUserByUsername,createUser,findUserByUsernameOrEmail } from "../services/userModel.js";
 import bcrypt from "bcrypt";
-import { signToken } from "../middleware/auth";
+import { signToken } from "../middleware/auth.js";
 
 
-const register = async (req, res) => {
+export const register = async (req, res) => {
 
     try {
-        const { username, email, password, role = "worker", full_name, phone } = req.body;
+        const { username, email, password,full_name  } = req.body;
 
         if (!username || !email || !password || !full_name) {
             return res.status(400).json({ error: "Missing required fields" });
@@ -20,13 +20,12 @@ const register = async (req, res) => {
         }
 
         const passwordHash = await bcrypt.hash(password, 10);
-        const newUser = await createUser({ username, email, password_hash, role, full_name, phone });
+        const newUser = await createUser({ username, email, passwordHash, full_name });
 
         //token
         const token = signToken({ 
             id: newUser.id,
             username: newUser.username,
-            role: newUser.role
         });
 
         res.status(201).json({
@@ -35,7 +34,6 @@ const register = async (req, res) => {
               id: newUser.id,
               username: newUser.username,
               email: newUser.email,
-              role: newUser.role,
               full_name: newUser.full_name,
             },
             token,
@@ -46,7 +44,7 @@ const register = async (req, res) => {
     }
 };
 
-const login = async (req, res) => {
+export const login = async (req, res) => {
     try{
         const { username, password} = req.body;
         if (!username || !password) {
@@ -58,9 +56,6 @@ const login = async (req, res) => {
             return res.status(401).json({ message: "Invalid username or password" });
         }
 
-        // active
-        if (!user.is_active) return res.status(401).json({ error: "Account is deactivated" });
-
         const passwordMatch = await bcrypt.compare(password, user.password_hash);
         if (!passwordMatch) {
             return res.status(401).json({ message: "Invalid username or password" });
@@ -69,7 +64,6 @@ const login = async (req, res) => {
         const token = signToken({
             id: user.id,
             username: user.username,
-            role: user.role
         });
 
         res.json({
@@ -78,7 +72,6 @@ const login = async (req, res) => {
                 id: user.id,
                 username: user.username,
                 email: user.email,
-                role: user.role,
                 full_name: user.full_name
             },
             token,
