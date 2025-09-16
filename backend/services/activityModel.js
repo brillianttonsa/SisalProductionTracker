@@ -30,4 +30,65 @@ export const getUserActivitiesFromDB = async (userId) => {
       [userId]
     );
     return result.rows;
-  };
+};
+
+export const updateActivityDB = async (id, userId, updates) => {
+    const {
+      farm_name,
+      activity_type,
+      description,
+      supervisor_name,
+      area_covered,
+      money_spent,
+      duration,
+      number_of_workers,
+      date_performed
+    } = updates;
+    
+    const query = `
+      UPDATE activities
+      SET farm_name = $1,
+          activity_type = $2,
+          description = $3,
+          supervisor_name = $4,
+          area_covered = $5,
+          money_spent = $6,
+          duration = $7,
+          number_of_workers = $8,
+          date_performed = $9
+      WHERE id = $10 AND user_id = $11
+      RETURNING *;
+    `;
+
+    const values = [
+      farm_name,
+      activity_type,
+      description,
+      supervisor_name,
+      area_covered,
+      money_spent,
+      duration,
+      number_of_workers,
+      date_performed,
+      id,
+      userId
+    ];
+
+
+    try {
+      const result = await pool.query(query, values);
+      return result.rows[0] || null;
+    } catch (error) {
+      console.error("DB update error:", error);;
+      return null;
+    }
+
+}
+
+export const deleteActivityFromDB = async (id) => {
+  const result = await pool.query(
+    `DELETE FROM activities WHERE id = $1 RETURNING *`,
+    [id]
+  );
+  return result;
+}
