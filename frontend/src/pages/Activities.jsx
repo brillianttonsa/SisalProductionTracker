@@ -43,15 +43,25 @@ const Activities = () => {
         if (!window.confirm("Are you sure you want to delete this activity?")) return;
       
         try {
-          await api.delete(`http://localhost:5000/api/activities/${id}`);
+          await api.delete(`/activities/${id}`);
           // Remove the deleted activity from state
           setActivities(prev => prev.filter(a => a.id !== id));
         } catch (err) {
           console.error("Error deleting activity:", err);
           alert("Failed to delete activity");
         }
-      };
+    };
 
+
+    //apply filters
+    const filteredActivities = activities.filter(activity => {
+        const matchesSearch = filters.search === "" || activity.farm_name?.toLowerCase().includes(filters.search.toLowerCase()) ||
+        activity.supervisor_name?.toLowerCase().includes(filters.search.toLowerCase())
+
+        const matchesType = filters.activity_type === "" || activity.activity_type === filters.activity_type
+
+        return matchesSearch && matchesType
+    })
 
     
 
@@ -109,12 +119,12 @@ const Activities = () => {
                         <option value="pre_planting">Pre-Planting</option>
                         </select>
                     </div>
-
+                    {/* clear filters */}
                     <div className="flex items-end">
                         <button
                         onClick={() => {
                             setFilters({ activity_type: "", search: "" })
-                            setPagination((prev) => ({ ...prev, page: 1 }))
+                            
                         }}
                         className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
                         >
@@ -124,7 +134,7 @@ const Activities = () => {
                 </div>
             </div>
 
-                  {/* Activities List */}
+            {/* Activities List */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200">
                 {loading ? (
                 <div className="flex items-center justify-center h-64">
@@ -143,7 +153,7 @@ const Activities = () => {
                         <TableHeader/>
                         <tbody className="bg-white divide-y divide-gray-200">
                         <AnimatePresence>
-                            {activities.map((activity) => (
+                            {filteredActivities.map((activity) => (
                             <motion.tr
                                 key={activity.id}
                                 initial={{ opacity: 0 }}
@@ -230,14 +240,14 @@ const Activities = () => {
             <AnimatePresence>
                 {editModal.open && (
                     <EditActivityModal
-                    isOpen={editModal.open}
-                    onClose={() => setEditModal({ open: false, activity: null })}
-                    activity={editModal.activity}
-                    onUpdated={(updated) => {
-                        setActivities(prev =>
-                        prev.map(a => (a.id === updated.id ? updated : a))
-                        )
-                    }}
+                        isOpen={editModal.open}
+                        onClose={() => setEditModal({ open: false, activity: null })}
+                        activity={editModal.activity}
+                        onUpdated={(updated) => {
+                            setActivities(prev =>
+                            prev.map(a => (a.id === updated.id ? updated : a))
+                            )
+                        }}
                     />
                 )}
             </AnimatePresence>
