@@ -40,7 +40,7 @@ const Production = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this production?")) return;
     try {
-      await api.delete(`/production/${id}`);
+      await api.delete(`/productions/${id}`);
       setProductions((prev) => prev.filter((p) => p.id !== id));
     } catch (err) {
       console.error(err);
@@ -52,7 +52,10 @@ const Production = () => {
     <div className="space-y-6">
       <div className="">
         <h1 className="text-2xl font-bold">Production Page</h1>
-        <p className="text-red-500 bg-red-100 px-2 rounded mt-2">{error}</p>
+        {error && (
+          <p className="text-red-500 bg-red-100 px-2 rounded mt-2">{error}</p>
+        )}
+
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -108,15 +111,17 @@ const Production = () => {
                                 ) : (
                                     productions.map((prod) => (
                                         <tr key={prod.id}>
-                                            <td className="px-4 py-4">{prod.batchNumber}</td>
+                                            <td className="px-4 py-4">{prod.productionDate}</td>
                                             <td className="px-4 py-4">{prod.farmName}</td>
-                                            <td className="px-4 py-4">{prod.gradedOutput.map((g, idx) => (
+                                            <td className="px-4 py-4">{prod.gradedOutput?.map((g, idx) => (
                                                 <div key={idx} className="text-sm">
                                                     {g.grade}: {g.numberOfBales} bales ({g.baleWeight}kg each)
                                                 </div>
                                             ))}</td>
-                                            <td className="px-4 py-4">{prod.description}</td>
-                                            <td className="px-4 py-4">{prod.supervisorName}</td>
+                                               
+
+                                            <td className="px-4 py-4">{prod.productionNotes}</td>
+                                            <td className="px-4 py-4">{prod.supervisor_name}</td>
                                         </tr>
                                     ))
                                 )}

@@ -4,7 +4,7 @@ import Sidebar from "../components/Sidebar";
 import { motion, AnimatePresence } from "framer-motion"
 
 const AppLayout = ({ children }) => {
-    const [sidebarOpen, setSidebarOpen] = useState(false)
+    const [sidebarOpen, setSidebarOpen] = useState(true)
   
     return (
       <div className="flex h-screen bg-gray-50">

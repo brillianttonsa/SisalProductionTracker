@@ -20,7 +20,7 @@ export const ProductionModal = ({ onSubmit }) => {
           },{
             grade: "Others",
             baleWeight: "",
-            numberOfBales: ""
+            numberOfBales: "0"
           }
         ],
     });
@@ -49,7 +49,7 @@ export const ProductionModal = ({ onSubmit }) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="bg-white rounded-xl shadow-xl w-full lg:grid-col-1"
+      className="bg-white rounded-xl shadow-xl w-full lg:grid-col-1 lg:h-[900px]"
     >
       <div className="p-6">
         <h3 className="text-lg font-semibold mb-4">Record Sisal Production</h3>

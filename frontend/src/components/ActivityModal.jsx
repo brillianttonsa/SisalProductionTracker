@@ -1,12 +1,12 @@
 import { useState } from "react"
 import { motion } from "framer-motion"
-
-const activity = false;
+import api from "../services/api";
 
 export const ActivityModal = ({ isOpen, onClose }) => {
     if (!isOpen) return null 
 
-
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState(null)
     const [formData, setFormData] = useState({
         farm_name: "",
         activity_type: "",
@@ -17,7 +17,6 @@ export const ActivityModal = ({ isOpen, onClose }) => {
         area_covered: "",
         supervisor_name: "",
         date_performed: new Date().toISOString().split("T")[0],
-        dynamicFields: {}
     })
 
     const handleChange = (e) => {
@@ -25,27 +24,22 @@ export const ActivityModal = ({ isOpen, onClose }) => {
         setFormData(prev => ({ ...prev, [name]: value }))
     }
 
-    const handleDynamicChange = (e) => {
-        const { name, value } = e.target
-        setFormData(prev => ({
-        ...prev,
-        dynamicFields: { ...prev.dynamicFields, [name]: value }
-        }))
-    }
-
-    const handleActivityTypeChange = (e) => {
-        const selectedType = e.target.value
-        setFormData(prev => ({ 
-            ...prev,
-            activity_type: selectedType,
-            dynamicFields: {} // clear the dynamic fields
-        }))
-    }
-
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault()
         console.log(formData)
+        setLoading(true)
+        setError("")
         // backend logic later
+        try {
+            
+            const res = await api.post("/activities", formData)
+            console.log("Created:", res.data)
+            
+            onClose()
+        } catch (err) {
+            setError(err)
+            console.error("Error creating activity:", err)
+        }
     }
 
     return (
@@ -58,17 +52,19 @@ export const ActivityModal = ({ isOpen, onClose }) => {
         >
             <div className="p-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-6">
-                {activity ? "Edit Activity" : "Add Sisal Activity"}
+                Add Sisal Activity
             </h2>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+                {error && (<p className="text-red-400">{error}</p>)}
 
                 {/* Activity Type */}
                 <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Activity Type</label>
                 <select
+                    name="activity_type"
                     value={formData.activity_type}
-                    onChange={handleActivityTypeChange}
+                    onChange={handleChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     required
                 >
@@ -106,6 +102,16 @@ export const ActivityModal = ({ isOpen, onClose }) => {
                     required
                 />
                 </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                    <textarea
+                        value={formData.description}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        rows="3"
+                        placeholder="Describe the activity..."
+                    />
+                </div>
 
                 {/* Workers & Duration */}
                 <div className="grid grid-cols-2 gap-4">
@@ -113,6 +119,7 @@ export const ActivityModal = ({ isOpen, onClose }) => {
                     <label className="block text-sm font-medium text-gray-700 mb-2">Number of Workers</label>
                     <input
                     type="number"
+                    min = "1"
                     name="number_of_workers"
                     value={formData.number_of_workers}
                     onChange={handleChange}
@@ -124,6 +131,7 @@ export const ActivityModal = ({ isOpen, onClose }) => {
                     <label className="block text-sm font-medium text-gray-700 mb-2">Duration (Days)</label>
                     <input
                     type="number"
+                    min={"1"}
                     name="duration"
                     value={formData.duration}
                     onChange={handleChange}
@@ -139,6 +147,7 @@ export const ActivityModal = ({ isOpen, onClose }) => {
                     <label className="block text-sm font-medium text-gray-700 mb-2">Area Covered (acres)</label>
                     <input
                     type="number"
+                    min={"0"}
                     step="0.01"
                     name="area_covered"
                     value={formData.area_covered}
@@ -151,6 +160,7 @@ export const ActivityModal = ({ isOpen, onClose }) => {
                     <label className="block text-sm font-medium text-gray-700 mb-2">Money Spent (/=)</label>
                     <input
                     type="number"
+                    min={"0"}
                     step="0.01"
                     name="money_spent"
                     value={formData.money_spent}
@@ -159,19 +169,6 @@ export const ActivityModal = ({ isOpen, onClose }) => {
                     required
                     />
                 </div>
-                </div>
-
-                {/* Description */}
-                <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Description (option)</label>
-                <textarea
-                    name="description"
-                    value={formData.description}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    rows="3"
-                    placeholder="Describe the activity..."
-                />
                 </div>
 
                 {/* Date Performed */}
@@ -187,97 +184,6 @@ export const ActivityModal = ({ isOpen, onClose }) => {
                 />
                 </div>
 
-                {/* Dynamic Fields Per Activity Type */}
-                {formData.activity_type === "pre-planting" && (
-                <input
-                    type="text"
-                    name="pre_planting_activity"
-                    placeholder="Pre-Planting Activity"
-                    value={formData.dynamicFields.pre_planting_activity || ""}
-                    onChange={handleDynamicChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    required
-                />
-                )}
-
-                {formData.activity_type === "planting" && (
-                <>
-                    <input
-                    type="number"
-                    name="seedlings_count"
-                    placeholder="Seedlings Count"
-                    value={formData.dynamicFields.seedlings_count || ""}
-                    onChange={handleDynamicChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent mb-2"
-                    required
-                    />
-                    <input
-                    type="text"
-                    name="seedling_type"
-                    placeholder="Seedling Type (option)"
-                    value={formData.dynamicFields.seedling_type || ""}
-                    onChange={handleDynamicChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    />
-                </>
-                )}
-
-                {formData.activity_type === "maintenance" && (
-                <input
-                    type="text"
-                    name="maintenance_activity"
-                    placeholder="Maintenance Activity (e.g. irrigation)"
-                    value={formData.dynamicFields.maintenance_activity || ""}
-                    onChange={handleDynamicChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    required
-                />
-                )}
-
-                {formData.activity_type === "harvesting" && (
-                <>
-                    <input
-                    type="number"
-                    name="leaves_harvested"
-                    placeholder="Leaves Harvested"
-                    value={formData.dynamicFields.leaves_harvested || ""}
-                    onChange={handleDynamicChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent mb-2"
-                    required
-                    />
-
-                    <input
-                    type="number"
-                    name="waste_byproduct"
-                    placeholder="Waste / Byproduct (kg) (option)"
-                    value={formData.dynamicFields.waste_byproduct || ""}
-                    onChange={handleDynamicChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    />
-                </>
-                )}
-
-                {formData.activity_type === "processing" && (
-                <>
-                    <input
-                    type="number"
-                    name="leaves_processed"
-                    placeholder="Leaves Processed"
-                    value={formData.dynamicFields.leaves_processed || ""}
-                    onChange={handleDynamicChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent mb-2"
-                    />
-                    <input
-                    type="number"
-                    name="fiber_extracted"
-                    placeholder="Fiber Extracted (kg)"
-                    value={formData.dynamicFields.fiber_extracted || ""}
-                    onChange={handleDynamicChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent mb-2"
-                    />
-                </>
-                )}
-
                 {/* Submit / Cancel */}
                 <div className="flex justify-end space-x-3 pt-4">
                 <button
@@ -289,9 +195,10 @@ export const ActivityModal = ({ isOpen, onClose }) => {
                 </button>
                 <button
                     type="submit"
-                    className="px-4 py-2 bg-green-600 text-white hover:bg-green-700 rounded-lg transition-colors"
+                    className={`px-4 py-2 ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"} text-white rounded-lg transition-colors`}
+
                 >
-                    {activity ? "Update" : "Create"} Activity
+                  {loading ? "Creating Activity...":"Create  Activity"}
                 </button>
                 </div>
 
