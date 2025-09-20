@@ -60,6 +60,18 @@ CREATE TABLE IF NOT EXISTS graded_outputs (
 );
 
 
+-- //sales 
+CREATE TABLE sales (
+  id SERIAL PRIMARY KEY,
+  user_id INT REFERENCES users(id) ON DELETE CASCADE,
+  sale_date DATE NOT NULL,
+  customer_name VARCHAR(255) NOT NULL,
+  product VARCHAR(255) NOT NULL,
+  quantity INT NOT NULL,
+  unit_price NUMERIC(10,2) NOT NULL,
+  sale_notes TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
 
 -- version2 down

@@ -33,7 +33,7 @@ const menuItems = [
           exit="closed"
           variants={sidebarVariants}
           transition={{ duration: 0.3, ease: "easeInOut" }}
-          className="fixed inset-y-0 left-0 z-50 bg-white shadow-xl border-r border-gray-200 lg:relative lg:translate-x-0"
+          className="fixed inset-y-0 left-0 z-1250 bg-white shadow-xl border-r border-gray-200 lg:relative lg:translate-x-0"
         >
           <div className="flex flex-col h-full">
             {/* Header */}
